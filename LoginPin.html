@@ -1,0 +1,206 @@
+<div class="container min-vh-100 d-grid justify-content-center">
+  <div class="row"></div>
+  <div class="row px-4">
+    <div class="logo d-flex align-items-center justify-content-center">
+      <img
+        class="w-75 img-fluid"
+        style="max-width: 23em; filter: drop-shadow(10px 8px 4px #00000023)"
+        src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Udvc.imp.png"
+        loading="lazy"
+        alt="UDVC logo"
+      />
+    </div>
+  </div>
+  <div class="row px-4">
+    <form id="otpForm" style="max-width: 400px">
+      <div class="d-grid gap-3 w-75 otp-in mx-auto" style="max-width: 672px">
+        <div class="row">
+          <div class="col">
+            <input
+              required
+              type="text"
+              autocapitalize="characters"
+              class="form-control fs-5 p-0 text-center"
+              style="height: 2em"
+            />
+          </div>
+          <div class="col">
+            <input
+              required
+              type="text"
+              autocapitalize="characters"
+              class="form-control fs-5 p-0 text-center"
+              style="height: 2em"
+            />
+          </div>
+          <div class="col">
+            <input
+              required
+              type="text"
+              autocapitalize="characters"
+              class="form-control fs-5 p-0 text-center"
+              style="height: 2em"
+            />
+          </div>
+          <div class="col">
+            <input
+              required
+              type="text"
+              autocapitalize="characters"
+              class="form-control fs-5 p-0 text-center"
+              style="height: 2em"
+            />
+          </div>
+          <div class="col">
+            <input
+              required
+              type="text"
+              autocapitalize="characters"
+              class="form-control fs-5 p-0 text-center"
+              style="height: 2em"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <small
+            id="resendOTP"
+            class="text-color text-end"
+            style="
+              font-size: 0.8em;
+              text-decoration: underline;
+              cursor: pointer;
+            "
+            >หากท่านไม่ได้รับรหัส?</small
+          >
+        </div>
+      </div>
+      <div class="w-100 d-flex justify-content-center align-items-center">
+        <button type="submit" class="btn btn-primary mt-2 w-75">
+          เข้าสู่ระบบ
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="row p-0 flex align-items-center">
+    <small style="font-size: 0.7em" class="text-center text-body-secondary"
+      >โปรดอย่าให้บุคคลภายนอกรู้รหัส OTP ที่ถูกส่งไปยัง Gmail <br />
+      เพื่อความปลอดภัยและสิทธิประโยชน์ของตัวท่านเอง</small
+    >
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $("#resendOTP").click(function () {
+      resendOTP();
+    });
+    const form = $("#otpForm");
+    const inputs = $(".otp-in input");
+    const inputLength = inputs.length;
+
+    inputs.each(function (index) {
+      $(this).attr("maxlength", 1);
+      $(this).on("input", function (e) {
+        const currentInput = $(this);
+        let currentValue = currentInput.val();
+        currentValue = currentValue.toUpperCase();
+        if (!/^[A-Z0-9]$/.test(currentValue)) {
+          currentInput.val("");
+          return;
+        }
+
+        currentInput.val(currentValue);
+
+        if (currentValue.length === 1) {
+          const nextIndex = index + 1;
+          if (nextIndex < inputLength) {
+            inputs.eq(nextIndex).focus();
+          } else {
+            currentInput.blur();
+            checkAndSubmit();
+          }
+        }
+      });
+
+      $(this).on("keydown", function (e) {
+        const currentInput = $(this);
+        if (e.key === "Backspace" && currentInput.val().length === 0) {
+          const prevIndex = index - 1;
+          if (prevIndex >= 0) {
+            e.preventDefault();
+            inputs.eq(prevIndex).focus().val("");
+          }
+        }
+      });
+
+      $(this).on("beforeinput", function (e) {
+        if (e.originalEvent.inputType === "deleteContentBackward") {
+          const prevIndex = index - 1;
+          if (prevIndex >= 0 && $(this).val().length === 0) {
+            e.preventDefault();
+            inputs.eq(prevIndex).focus().val("");
+          }
+        }
+      });
+    });
+    function resendOTP() {
+      $("#loading").show();
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (res.status) {
+            $("#statusModal").modal("show");
+            $("#statusModalTitle").text(res.title);
+            $("#statusModalDesc").html(res.message);
+            $("#btnStatus").addClass("btn-success");
+          }
+          $("#loading").hide();
+        })
+        .withFailureHandler(function (error) {
+          console.error(error);
+        })
+        .resendOTP();
+    }
+
+    function checkAndSubmit() {
+      let isComplete = true;
+      let otp = "";
+
+      inputs.each(function () {
+        const value = $(this).val();
+        if (value === "") {
+          isComplete = false;
+          return false;
+        }
+        otp += value;
+      });
+
+      if (isComplete) {
+        if (otp.length === 5) {
+          $("#loading").show();
+          google.script.run
+            .withSuccessHandler(function (res) {
+              if (res.status) {
+                $("#statusModal").modal("show");
+                $("#statusModalTitle").text(res.title);
+                $("#statusModalDesc").html(res.message);
+                $("#btnStatus").addClass("btn-success");
+                $("#container").html(res.html);
+              } else {
+                $("#statusModal").modal("show");
+                $("#statusModalTitle").text(res.title);
+                $("#statusModalDesc").html(res.message);
+                $("#btnStatus").addClass("btn-danger");
+              }
+              $("#loading").hide();
+            })
+            .withFailureHandler(function (error) {
+              console.error(error);
+            })
+            .verifyOTP(otp);
+        }
+      }
+    }
+
+    inputs.first().focus();
+  });
+</script>

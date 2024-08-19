@@ -1,0 +1,53 @@
+<div class="container-sm">
+  <div class="d-grid px-1">
+    <div class="row" style="border-bottom: 1px solid var(--primary-color)">
+      <div class="col">
+        <p class="m-0 text-color fs-3" id="categorytitle"></p>
+      </div>
+      <div class="col"></div>
+    </div>
+    <div class="row mt-3 align-items-baseline">
+      <div class="col-4 px-0 ps-1">
+        <p class="m-0 text-color" style="font-size: 0.8em" id="showDate"></p>
+      </div>
+      <div class="col">
+        <div class="select-wrapper">
+          <select
+            style="
+              height: 2em;
+              max-width: 90%;
+              border: 1px solid var(--primary-color);
+              border-radius: 8px;
+            "
+            id="options"
+            class="form-select mx-auto form-select-sm text-color w-100"
+            aria-label="Small select example"
+          ></select>
+        </div>
+      </div>
+    </div>
+    <div class="row h-100">
+      <div class="col"></div>
+    </div>
+  </div>
+  <div class="position-fixed" style="right: 1em; bottom: 2em">
+    <button class="btn btn-primary" style="border-radius: 30px">
+      <span class="d-flex align-items-center justify-content-center gap-2">
+        บันทึก<i
+          style="font-size: 1.3em"
+          class="fa-solid fa-user-check text-white"
+        ></i
+      ></span>
+    </button>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    dayjs.locale("th");
+    dayjs.extend(window.dayjs_plugin_buddhistEra);
+    $("#showDate").text(formatThaiDate(new Date()));
+  });
+  function formatThaiDate(date) {
+    return dayjs(date).format("วันdddd ที่ D MMM BB");
+  }
+</script>

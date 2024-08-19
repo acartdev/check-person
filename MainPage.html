@@ -1,0 +1,49 @@
+<header id="header" class="container-fluid d-flex align-items-center"></header>
+<main
+  id="seconContainer"
+  style="overflow: hidden; min-height: calc(100vh - 60px)"
+></main>
+<script>
+  $(document).ready(function () {
+    getPage();
+  });
+  function loadPageStack() {
+    let storedStack = sessionStorage.getItem("PAGE_STACK");
+    if (!storedStack) {
+      storedStack = JSON.stringify(["HomePage"]);
+      savePageStack(["HomePage"]);
+    }
+    return JSON.parse(storedStack);
+  }
+  function savePageStack(stack) {
+    sessionStorage.setItem("PAGE_STACK", JSON.stringify(stack));
+  }
+  function getPage() {
+    $("#loading").show();
+    const pageStack = loadPageStack();
+    google.script.run
+      .withSuccessHandler(function (res) {
+        if (res) {
+          $("#header").html(res.header);
+          $("#seconContainer").html(res.content);
+        }
+        $("#loading").hide();
+      })
+      .pageStack(pageStack[pageStack.length - 1]);
+  }
+  function logout() {
+    $("#loading").show();
+    google.script.run
+      .withSuccessHandler(function (res) {
+        if (res.status) {
+          $("#statusModal").modal("show");
+          $("#statusModalTitle").text(res.title);
+          $("#statusModalDesc").html(res.message);
+          $("#btnStatus").addClass("btn-success");
+          $("#container").html(res.html);
+        }
+        $("#loading").hide();
+      })
+      .logout();
+  }
+</script>

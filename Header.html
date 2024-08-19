@@ -1,0 +1,53 @@
+<nav
+  class="container-md h-100 d-flex justify-content-between align-items-center px-0"
+>
+  <button class="btn" onclick="prevPage(event)">
+    <i class="fa-solid fa-chevron-left text-white" style="font-size: 1.5em"></i>
+  </button>
+  <p class="m-0">ระบบเช็คชื่อการเข้าแถวบุคคลกร</p>
+  <button class="btn" onclick="homepage(event)">
+    <i class="fa-solid fa-house text-white" style="font-size: 1.5em"></i>
+  </button>
+</nav>
+<script>
+  function prevPage(event) {
+    event.preventDefault();
+    const PAGE_STACK = loadPageStack();
+    PAGE_STACK.pop();
+    savePageStack(PAGE_STACK);
+    $("#loading").show();
+    google.script.run
+      .withSuccessHandler(function (res) {
+        $("#header").html(res.header);
+        $("#seconContainer").html(res.content);
+        $("#loading").hide();
+      })
+      .withFailureHandler(function (error) {
+        console.error(error);
+      })
+      .pageStack(PAGE_STACK[PAGE_STACK.length - 1]);
+  }
+  function homepage(event) {
+    event.preventDefault();
+    $("#loading").show();
+    const PAGE_STACK = ["HomePage"];
+    savePageStack(PAGE_STACK);
+    google.script.run
+      .withSuccessHandler(function (res) {
+        $("#header").html(res.header);
+        $("#seconContainer").html(res.content);
+        $("#loading").hide();
+      })
+      .withFailureHandler(function (error) {
+        console.error(error);
+      })
+      .pageStack("HomePage");
+  }
+  function loadPageStack() {
+    const storedStack = sessionStorage.getItem("PAGE_STACK");
+    return storedStack ? JSON.parse(storedStack) : ["HomePage"];
+  }
+  function savePageStack(stack) {
+    sessionStorage.setItem("PAGE_STACK", JSON.stringify(stack));
+  }
+</script>

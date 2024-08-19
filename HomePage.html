@@ -1,0 +1,225 @@
+<div class="container-md mt-2 px-2">
+  <div class="d-grid">
+    <div class="row mx-auto justify-content-end" style="width: 99%">
+      <div
+        class="col d-flex align-items-end justify-content-start px-0"
+        style="
+          max-width: 400px;
+          @media screen and (max-width: 768px) {
+            max-width: 238px;
+          }
+        "
+      >
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"
+            ><i
+              class="fa-solid fa-calendar-days text-color"
+              style="font-size: 1.5em"
+            ></i
+          ></span>
+          <input
+            type="text"
+            style="box-shadow: none; border: 1px solid #e5e5e5"
+            class="form-control"
+            id="startDate"
+          />
+        </div>
+        <button id="clearDate" class="input-group-text">
+          <i
+            class="fa-solid fa-arrows-rotate text-color"
+            style="font-size: 1em"
+          ></i>
+        </button>
+      </div>
+    </div>
+    <div
+      class="row pb-1 mx-auto mt-2 w-100"
+      style="border-bottom: 1px solid var(--primary-color)"
+    >
+      <div class="col d-flex align-items-end">
+        <span class="text-color"
+          >จำนวนทั้งหมด <span id="dateCount"></span> วัน</span
+        >
+      </div>
+    </div>
+    <div class="row px-3" id="dataList"></div>
+    <button
+      id="check"
+      class="btn btn-primary position-fixed"
+      style="bottom: 1.5em; right: 1em; border-radius: 30px"
+    >
+      เช็คชื่อ <i class="fa-solid fa-user-check"></i>
+    </button>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    let allData = [];
+    let filterData = [];
+    const PREV_SHEET = "prev_sheet";
+    if (sessionStorage.getItem(PREV_SHEET)) {
+      sessionStorage.removeItem(PREV_SHEET);
+    }
+    $("#loading").show();
+    google.script.run
+      .withSuccessHandler(function (res) {
+        allData = JSON.parse(res);
+        filterData = allData.slice();
+        $("#dateCount").text(filterData.length);
+        if (filterData.length > 0) {
+          const html = generateHTML(filterData);
+          $("#dataList").html(html);
+        } else {
+          $("#dataList").html(
+            '<div class="col-12 mt-5 text-center text-color fs-3">ไม่พบข้อมูล..</div>'
+          );
+        }
+        $("#loading").hide();
+      })
+      .withFailureHandler(function (error) {
+        console.error(error);
+      })
+      .getFolderFilesSortedByDate();
+    $("#check").on("click", function (e) {
+      e.preventDefault();
+      $("#loading").show();
+      const PAGE_STACK = loadPageStack();
+      PAGE_STACK.push("CategoryPage");
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (res.status) {
+            savePageStack(PAGE_STACK);
+            google.script.run
+              .withSuccessHandler(function (res) {
+                $("#header").html(res.header);
+                $("#seconContainer").html(res.content);
+                $("#loading").hide();
+              })
+              .withFailureHandler(function (error) {
+                console.error(error);
+              })
+              .pageStack(PAGE_STACK[PAGE_STACK.length - 1]);
+          } else {
+            $("#statusModal").modal("show");
+            $("#statusModalTitle").text(res.title);
+            $("#statusModalDesc").html(res.message);
+            $("#btnStatus").addClass("btn-warning");
+          }
+          $("#loading").hide();
+        })
+        .withFailureHandler(function (error) {
+          console.error(error);
+        })
+        .copySheetAndAddDate();
+    });
+    const dateConfig = {
+      dateFormat: "d/m/Y",
+      locale: "th",
+      mode: "range",
+      minDate: "today",
+      onValueUpdate: function (selectedDates, dateStr, instance) {
+        const startDate = selectedDates[0];
+        let endDate = selectedDates[1];
+
+        if (!endDate) {
+          endDate = startDate;
+        }
+
+        const filteredData = filterData.filter((item) => {
+          const date = new Date(item.dateCreated);
+          const buddhistYearDate = new Date(
+            date.setFullYear(date.getFullYear() + 543)
+          );
+          return buddhistYearDate >= startDate && buddhistYearDate <= endDate;
+        });
+
+        $("#dateCount").text(filteredData.length);
+        if (filteredData.length > 0) {
+          const html = generateHTML(filteredData);
+          $("#dataList").html(html);
+        } else {
+          $("#dataList").html(
+            '<div class="col-12 mt-5 text-center text-color fs-3">ไม่พบข้อมูล..</div>'
+          );
+        }
+      },
+    };
+    const startDate = $("#startDate").flatpickr(dateConfig);
+    startDate.changeYear(new Date().getFullYear() + 543);
+
+    $("#clearDate").on("click", function (e) {
+      e.preventDefault();
+      startDate.clear();
+      filterData = allData.slice();
+      $("#dateCount").text(filterData.length);
+      const html = generateHTML(filterData);
+      $("#dataList").html(html);
+    });
+  });
+  function loadPageStack() {
+    const storedStack = sessionStorage.getItem("PAGE_STACK");
+    const PAGE_STACK = ["HomePage"];
+    if (!storedStack) {
+      savePageStack(PAGE_STACK);
+    }
+    return storedStack ? JSON.parse(storedStack) : PAGE_STACK;
+  }
+  function savePageStack(stack) {
+    sessionStorage.setItem("PAGE_STACK", JSON.stringify(stack));
+  }
+  function generateHTML(data = []) {
+    let html = "";
+    data.forEach((item, index) => {
+      let list = "";
+      list += `<button ${
+        isOlderThanDays(item.dateCreated) ? "disabled" : ""
+      } onclick="categoryPage(event,'${
+        item.id
+      }')" class="col-12 btn mt-2 btn-light" >`;
+      list += `<div class="row py-2" style="box-shadow:var(--btn-shadow);border-radius:10px">`;
+      list += `<div class="col-3"><img width="60"  src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Udvc.imp.png" loading="lazy" /></div>`;
+      list += `<div class="col">`;
+      list += `<div class="row">`;
+      list += `<div class="col-12 text-color d-flex justify-content-between align-items-center"><div class="text-color">${item.name}</div> <div><i class="fa-solid fa-user-pen text-color"></i></div></div>`;
+      list += `<div class="col-12 text-color text-start" style="font-size:0.8em;">กิจกรรมเข้าแถวหน้าเสาธง</div>`;
+      list += `<div class="col-8"><div class="d-flex justify-content-between align-items-center"  style="font-size:0.8em;"><div class="text-color">เข้าร่วม ${item.participantCount}</div> <div class="text-color">ไม่เข้าร่วม ${item.nonParticipantCount}</div></div></div>`;
+      list += `</div>`;
+      list += `</div>`;
+      list += `</div>`;
+      list += `</button>`;
+      html += list;
+    });
+    html += "";
+    return html;
+  }
+  function categoryPage(e, id) {
+    e.preventDefault();
+    $("#loading").show();
+    const PAGE_STACK = loadPageStack();
+    PAGE_STACK.push("CategoryPage");
+    savePageStack(PAGE_STACK);
+    const PREV_SHEET = "prev_sheet";
+    sessionStorage.setItem(PREV_SHEET, id);
+    google.script.run
+      .withSuccessHandler(function (res) {
+        $("#header").html(res.header);
+        $("#seconContainer").html(res.content);
+        $("#loading").hide();
+      })
+      .withFailureHandler(function (error) {
+        console.error(error);
+      })
+      .pageStack(PAGE_STACK[PAGE_STACK.length - 1]);
+  }
+  function isOlderThanDays(dateCreated, days = 15) {
+    dateCreated = new Date(dateCreated);
+    if (!(dateCreated instanceof Date) || isNaN(dateCreated)) {
+      throw new Error("Invalid date object");
+    }
+    const currentDate = new Date();
+    const pastDate = new Date(currentDate);
+    pastDate.setDate(currentDate.getDate() - days);
+
+    return dateCreated < pastDate;
+  }
+</script>

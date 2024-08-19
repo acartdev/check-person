@@ -1,0 +1,244 @@
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+  integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+  integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+<link
+  href="https://cdn.jsdelivr.net/npm/jquery-ui@1.13.2/dist/themes/base/jquery-ui.min.css"
+  rel="stylesheet"
+/>
+<script src="https://cdn.jsdelivr.net/npm/jquery-ui@1.13.2/dist/jquery-ui.min.js"></script>
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+  crossorigin="anonymous"
+/>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+  crossorigin="anonymous"
+></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+/>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://npmcdn.com/flatpickr/dist/themes/confetti.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/flatpickr.min.js"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/locale/th.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/plugin/buddhistEra.min.js"></script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+  :root {
+    --btn-shadow: 3px 3px 5px 2px rgba(0, 0, 0, 0.2);
+    --input-shadow: 2px 2px 4px 2px rgba(0, 0, 0, 0.2);
+    --header-shadow: 3px 2px 4px 2px rgba(0, 0, 0, 0.2);
+    --primary-color: #6a3300;
+    --secon-color: #e7d8ca;
+  }
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Prompt", sans-serif;
+  }
+  ::-webkit-scrollbar {
+    width: 15px;
+  }
+  .custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    height: 0;
+    width: 0;
+  }
+  .custom-checkbox .checkmark {
+    position: relative;
+    display: inline-block;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #ffffff;
+    border: 1.5px solid var(--primary-color);
+    border-radius: 4px;
+  }
+  .custom-checkbox input:checked ~ .checkmark {
+    background-color: var(--primary-color);
+    border: 1.5px solid var(--primary-color);
+  }
+  .custom-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid #ffffff; /* This is a red color */
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  .custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+  .select-wrapper {
+    height: 50px;
+    overflow-y: visible;
+  }
+
+  .select {
+    width: 100%;
+    /* make it min-height*/
+    min-height: 50px;
+    border-radius: 25px;
+    border-color: #555;
+    padding: 10px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  .text-color {
+    color: var(--primary-color);
+  }
+  .form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(253, 129, 13, 0.25);
+    border-color: var(--primary-color);
+  }
+  .form-control {
+    border: 1px solid var(--primary-color);
+    box-shadow: var(--input-shadow);
+  }
+  .btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary-color);
+    --bs-btn-hover-border-color: var(--primary-color);
+    --bs-btn-focus-shadow-rgb: 49, 132, 253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--primary-color);
+    --bs-btn-active-border-color: var(--primary-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: var(--primary-color);
+    --bs-btn-disabled-border-color: var(--primary-color);
+    box-shadow: var(--btn-shadow);
+  }
+  #emailInput::placeholder {
+    font-size: small;
+  }
+  #header {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: var(--header-shadow);
+    min-height: 3.7em;
+  }
+  #loading {
+    display: none;
+    position: fixed;
+    cursor: wait;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .spinner {
+    border: 5px solid #e5e5e5;
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%;
+    width: 2.3em;
+    height: 2.3em;
+    animation: spin 0.5s linear infinite;
+  }
+  .btn-outline-primary {
+    --bs-btn-color: ;
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary-color);
+    --bs-btn-hover-border-color: var(--primary-color);
+    --bs-btn-focus-shadow-rgb: 13, 110, 253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--primary-color);
+    --bs-btn-active-border-color: var(--primary-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: var(--primary-color);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--primary-color);
+    --bs-gradient: none;
+  }
+  .form-select:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(253, 121, 13, 0.25);
+  }
+  .flatpickr-calendar .flatpickr-months {
+    background-color: var(--primary-color);
+  }
+  .flatpickr-calendar .flatpickr-months .flatpickr-month {
+    background-color: var(--primary-color);
+  }
+  .flatpickr-calendar
+    .flatpickr-months
+    .flatpickr-month
+    .flatpickr-current-month
+    .flatpickr-monthDropdown-months {
+    background-color: var(--primary-color);
+  }
+  .flatpickr-current-month
+    .flatpickr-monthDropdown-months
+    .flatpickr-monthDropdown-month {
+    background-color: #fff;
+    color: var(--primary-color);
+  }
+  .flatpickr-calendar .flatpickr-weekdays {
+    background-color: var(--primary-color);
+  }
+  .flatpickr-calendar .flatpickr-weekdaycontainer .flatpickr-weekday {
+    color: white;
+    background-color: var(--primary-color);
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>

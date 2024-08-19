@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <?!= include('Head') ?>
+  </head>
+  <body>
+    <div id="loading">
+      <div class="spinner"></div>
+      <small class="text-white">กรุณารอซักครู่...</small>
+    </div>
+    <div id="container"></div>
+    <div
+      class="modal fade modal-sm"
+      id="statusModal"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+      aria-labelledby="statusModalTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="statusModalTitle"></h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="statusModalDesc"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              data-bs-dismiss="modal"
+              id="btnStatus"
+              class="btn"
+            >
+              ตกลง
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="modal fade modal-sm"
+      id="holidayModal"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+      aria-labelledby="holidayModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">ระบุวันหยุด 📆</h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-floating">
+              <textarea
+                class="form-control"
+                placeholder="Leave a comment here"
+                id="floatingTextarea2"
+                style="height: 100px"
+              ></textarea>
+              <label for="floatingTextarea2">หยุดเนื่องในวัน...</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              onclick="saveHoliday(event)"
+              data-bs-dismiss="modal"
+              id="btnStatus"
+              class="btn btn-primary"
+            >
+              บันทึก
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      $(document).ready(function () {
+        checkLoginPage();
+      });
+      function saveHoliday(event) {
+        event.preventDefault();
+        $("#loading").show();
+        const fileid = sessionStorage.getItem("prev_sheet");
+        let holiday = $("#floatingTextarea2").val();
+        console.log(fileid, holiday);
+
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (res) {
+              $("#statusModal").modal("show");
+              $("#statusModalTitle").text(res.title);
+              $("#statusModalDesc").html(res.message);
+              $("#btnStatus").addClass("btn-success");
+            } else {
+              $("#statusModal").modal("show");
+              $("#statusModalTitle").text(res.title);
+              $("#statusModalDesc").html(res.message);
+              $("#btnStatus").addClass("btn-danger");
+            }
+            $("#loading").hide();
+          })
+          .withFailureHandler(function (error) {
+            console.error(error);
+          })
+          .renameSheet(fileid, holiday);
+      }
+      function checkLoginPage() {
+        $("#loading").show();
+        google.script.run
+          .withSuccessHandler(function (loginStatus) {
+            let page = "";
+            switch (loginStatus) {
+              case "login":
+                page = "MainPage";
+                break;
+              case "pending":
+                page = "LoginPin";
+                break;
+              case "logout":
+                page = "Login";
+                break;
+              default:
+                page = "Login";
+                break;
+            }
+            google.script.run
+              .withSuccessHandler(function (html) {
+                $("#container").html(html);
+                $("#loading").hide();
+              })
+              .withFailureHandler(function (error) {
+                console.error(error);
+              })
+              .include(page);
+          })
+          .isLoggedIn();
+      }
+    </script>
+  </body>
+</html>
